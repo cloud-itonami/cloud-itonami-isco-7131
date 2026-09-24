@@ -1,0 +1,34 @@
+;; What this vertical's robot physically does, declared for
+;; kotoba.robotics.process (kotoba-lang/robotics). `kbb -M:physics` runs it.
+;;
+;; README "Robotics premise": a job-site scheduling/logistics coordination
+;; robot for painters (ISCO 7131) schedules the crew, logs materials usage
+;; and progress, and coordinates paint/coating supply orders; it never paints.
+;; Its physical work is lifting paint pails onto the working platform; the
+;; physics its scheduling depends on is when a cold exterior wall has warmed
+;; enough in the morning to be painted without condensation.
+;;
+;; Every number without a cited source is marked `estimate` in its :basis.
+;; Replacing an estimate with a sourced value is this bot's growth work.
+{:physics/schema "itonami.physical-ai.spec.v1"
+ :repo "cloud-itonami/cloud-itonami-isco-7131"
+ :cases
+ [{:id :pail-onto-platform
+   :kind :manipulator
+   :procedure "arm lifts a paint pail from the ground-level materials cart onto the mobile working platform"
+   :params {:l1-m 0.70 :l2-m 0.60 :m1-kg 10.0 :m2-kg 7.0
+            :from [0.75 0.15] :to [0.35 1.15] :duration-s 3.0 :steps 600}
+   :sweep {:param :payload-kg :values [5.0 10.0 15.0 20.0 28.0]}
+   :quantity :peak-tau1-nm
+   :limit {:max 250.0 :basis "estimate: continuous shoulder torque of a ~20 kg-payload industrial arm class"}
+   :boundary {:lo 1.0 :hi 80.0}}
+  {:id :wall-warmup-before-painting
+   :kind :thermal
+   :procedure "a 200 mm concrete exterior wall at 5 C after a cold night warms under 15 C morning air plus sun (sol-air ~25 C); the robot schedules painting only once the surface is safely above the dew point; the waiting time is swept"
+   :params {:thickness-m 0.20 :conductivity-w-mk 1.6 :density-kg-m3 2300.0 :specific-heat-j-kgk 900.0
+            :t0-c 5.0 :t-hot-c 25.0 :h-front-w-m2k 15.0 :t-back-ambient-c 18.0 :h-back-w-m2k 8.0
+            :threshold-c 100.0}
+   :sweep {:param :duration-s :values [1800.0 3600.0 5400.0 7200.0 10800.0 14400.0]}
+   :quantity :final-front-c
+   :limit {:min 13.0 :basis "estimate: surface at least 3 C above an assumed 10 C dew point (the 3 C margin is the rule of thumb usually associated with ISO 8502-4; clause not verified here)"}
+   :boundary {:lo 600.0 :hi 21600.0}}]}
