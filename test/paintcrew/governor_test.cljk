@@ -1,5 +1,5 @@
 (ns paintcrew.governor-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [paintcrew.store :as store]
             [paintcrew.advisor :as advisor]
             [paintcrew.governor :as governor]))
